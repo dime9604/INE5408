@@ -88,6 +88,59 @@ public:
     // caso de erros, ver parte no método que ele copia os filhos do ultimo nivel do aux
     void separarFilhos(int i, NoBTree *aux);
 
+    /*
+    *****************************************************************************
+                            Métodos exclusivos da deleção
+    *****************************************************************************
+    */
+
+    // método que retorna o indice da primeira chave maior ou igual a "chave"
+    int encontrarChave(int chave);
+
+    // um wrapper para remover a chave em subárvores deste nodo
+    void remover(int chave);
+
+    /*
+        método para remover a chave presente na n-ésima posição desse nodo
+        caso seja um nodo folha
+    */
+    void removerDeFolha(int n);
+
+    /*
+        método para remover a chave presente na n-ésima posição desse nodo
+        caso não seja um nodo folha
+    */
+    void removerDeNaoFolha(int n);
+
+    /*
+        função que retorna o sucessor da chave presente na n-ésima posição do nodo
+    */
+    int getSucessor(int n);
+
+    /*
+        função que retorna o antecessor da chave presente na n-ésima posição do nodo
+    */
+    int getAntecessor(int n);
+
+    /*
+        função para preencher o nodo filho presente na n-ésima posição no array
+        filhos[] se esse filho tem menos que nivel-1 chaves
+    */
+    void preencher(int n);
+
+    /*
+        função que pega emprestado uma chave do nodo filhos[n-1] e coloca no nodo
+        filhos[n]
+    */
+    void emprestarDoProximo(int n);
+
+    /*
+        função que pega emprestado uma chave do nodo filhos[n+1] e coloca no nodo
+        filhos[n]
+    */
+    void emprestarDoAnterior(int n);
+
+
 };
 
 void NoBTree::reordenar() {
@@ -199,4 +252,20 @@ void NoBTree::separarFilhos(int i, NoBTree *aux) {
     chaves[i] = aux->getChave(nivel-1);
     // incrementa a contagem de chaves desse nodo
     Nchaves+=1;
+}
+
+/*
+    *****************************************************************************
+                            Métodos exclusivos da deleção
+    *****************************************************************************
+*/
+int NoBTree::encontrarChave(int chave) {
+    int i = 0;
+    while(i < Nchaves && chaves[i] < chave) {
+        ++i;
+    }
+    return i;
+}
+void NoBTree::remover(int chave) {
+
 }

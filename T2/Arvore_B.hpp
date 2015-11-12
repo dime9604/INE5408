@@ -28,7 +28,11 @@ class ArvoreB {
         } else return NULL;
     }
 
+    // função que insere uma nova chave na árvore B
     void insere(int chave);
+
+    // função que remove uma chave na árvore B
+    void remove(int chave);
 
 };
 
@@ -59,3 +63,4 @@ void ArvoreB::insere(int chave) {
         }
     }
 }
+
