@@ -140,6 +140,11 @@ public:
     */
     void emprestarDoAnterior(int n);
 
+    /*
+        função que funde o n-ésimo filho com o nodo do n+1-ésimo filho do nodo
+    */
+    void fundir(int n);
+
 
 };
 
@@ -267,5 +272,56 @@ int NoBTree::encontrarChave(int chave) {
     return i;
 }
 void NoBTree::remover(int chave) {
-
+    int indice = encontrarChave(chave);
+    // se for verdadeiro, a chave a ser removida está presente neste nodo
+    if(indice < Nchaves && chaves[indice] == chave) {
+        /*
+            1- se for um nodo folha, chama a função removerDeFolha()
+            2- se não for um nodo folha, chama a função removerDeNaoFolha()
+        */
+        if(folha) {
+            removerDeFolha(indice);
+        } else {
+            removerDeNaoFolha(indice);
+        }
+    } else {
+        // se o nodo é folha, então a chave não está presente
+        if(folha) {
+            throw 666;
+        }
+        /* A chave a ser removida está presente em uma subárvore deste nodo,
+           a flag indica se a chave está na subárvore enraizada com o último
+           filho deste nodo
+        */
+        bool flag = false;
+        if(indice = Nfolhas) {
+            flag = true;
+        }
+        /* Se o nodo filho onde esta chave supostamente está tem menos que "nivel"
+        chaves, será preenchido aquele nodo filho
+        */
+        if(filhos[indice]->getNChaves() < nivel) {
+            preencher(indice);
+        }
+        /*
+            Se o ultimo filho foi fundido, ele tem que se fundir com o filho anterior e
+            então usamos recursão no (indice-1)-ésimo filho, caso contrário, nós usamos
+            recursão no indice-ésimo filho que agora tem pelo menos (nivel) chaves
+        */
+        if(flag && indice < Nchaves) {
+            filhos[indice-1]->remover(chave);
+        } else {
+            filhos[indice]->remover(chave);
+        }
+    }
+    return;
+}
+void NoBTree::removerDeFolha(int chave) {
+    // move todas as chaves depois da (chave)-ésima posição
+    for(int i = chave+1; i < Nchaves; i++) {
+        chaves[i-1] = chaves[i];
+        // reduz a contagem de chaves
+        Nchaves--;
+    }
+    return;
 }
