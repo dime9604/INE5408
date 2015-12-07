@@ -70,6 +70,18 @@ public:
         return filhos[indice];
     }
 
+    void incrementaNchaves() {
+        Nchaves+=1;
+    }
+
+    void decrementaNchaves() {
+        Nchaves-=1;
+    }
+
+    void aumentaNChaves(int valor) {
+        Nchaves += valor;
+    }
+
     /*
     *****************************************************************************
         Métodos que executam coisas mais relevantes que getters ou setters!!
@@ -325,3 +337,205 @@ void NoBTree::removerDeFolha(int chave) {
     }
     return;
 }
+void NoBTree::removerDeNaoFolha(int chave) {
+    int k = chaves[chave];
+    /*
+        se o filho que precede k (filhos[chave]) tem pelo menos "nivel" chaves, encontra
+        o predecessor de k na subárvore de filhos[chave]. Substitui k pelo predecessor, e
+        recursivamente deleta o predecessor em filhos[chave]
+    */
+    if(filhos[chave]->getNChaves() >= nivel) {
+        int ant = getAntecessor(chave);
+        chaves[chave] = ant;
+        filhos[chave]->remover(ant);
+    }
+    /*
+        se o filho "filhos[chave]" tem menos que "nivel" chaves, verifique filhos[chame+1].
+        se filhos[chave+1] tem pelo menos "nivel" chaves, procura o sucessor de k na subárvore
+        de filhos[chave+1]. substitui k pelo sucessor, e recursivamente deleta o sucessor em
+        filhos[chave+1]
+    */
+    else if(filhos[chave+1]->getNChaves() >= nivel) {
+        int suc = getSucessor(chave);
+        chaves[chave] = suc;
+        filhos[chave+1]->remover(suc);
+    }
+    /*
+        caso filhos[chave] e filhos[chave+1] tenham menos que nivel chaves, junta k e todos
+        de filhos[chave+1] em filhos[chave], então filhos[chave] contém 2nivel-1 chaves
+        desaloca filhos[chave+1] e deleta recursivamente k de filhos[chave]
+    */
+    else {
+        fundir(chave);
+        filhos[chave]->remover(k);
+    }
+    return;
+}
+int NoBTree::getAntecessor(int chave) {
+    NoBTree *aux = filhos[chave];
+    while(!aux->getFolha()) {
+        aux = aux->getFilhos(aux->getNChaves());
+    }
+    return aux->getChave(aux->getNChaves()-1);
+}
+int NoBTree::getSucessor(int chave) {
+    NoBTree *aux = filhos[chave+1];
+    while(!aux->getFolha()) {
+        aux = aux->getFilhos(0);
+    }
+    return aux->getChave(0);
+}
+void NoBTree::preencher(int chave) {
+    /*
+        Se o filho anterior (filhos[chave-1]) tem menos que nivel-1 chaves, pega uma chave
+        emprestada desse filho
+    */
+    if(chave != 0 && filhos[chave-1]->getNChaves() >= nivel) {
+        emprestarDoAnterior(chave);
+    }
+    /*
+        Se o próximo filho (filhos[chave+1]) tem mais que nivel-1 chaves, pega uma chave
+        emprestada desse filho
+    */
+    else if(chave != Nchaves && filhos[chave+1]->getNChaves() >= nivel) {
+        emprestarDoProximo(chave);
+    }
+    /*
+        Se filhos[chave] é o ultimo filho, "funde" com seu "ramo" anterior, caso contrário
+        funde com o próximo
+    */
+    else {
+        if (chave != Nchaves) {
+            fundir(chave);
+        }
+        else {
+            fundir(chave-1);
+        }
+    }
+    return;
+}
+void NoBTree::emprestarDoAnterior(int chave) {
+
+    NoBTree *filho = filhos[chave];
+    NoBTree *ramo = filhos[chave-1];
+
+    /*
+        a ultima chave de filhos[chave-1] vai para o pai e a chaves[chave-1] do pai é
+        inserida como a primeira chave em filhos[chave].
+    */
+
+    // movendo todas as chaves de filhos[chave] para a frente
+    for(int i = (filho->getNChaves())-1; i >= 0; i++) {
+        filho->setChaves(i+1, filho->getChave(i));
+    }
+
+    // se filhos[chave] não é uma folha, move todos os ponteiros filho para frente
+
+    if(!filho->getFolha()) {
+        for(int i = filho->getNChaves(); i >= 0; i++) {
+            filho->setFilhos(i+1, filho->getFilhos(i));
+        }
+    }
+
+    // colocando a primeira chave do filho igual a chaves[chave-1] do nodo atual
+
+    filho->setChaves(0, chaves[chave-1]);
+
+    // movendo o ramo do ultimo filho como filhos[chave] do primeiro filho (confuso)
+
+    if(!folha) {
+        // VAI DAR DOR DE CABEÇA
+        filho->setFilhos(0, ramo->getFilhos(ramo->getNChaves());// PONTO DE OBSERVAÇÃO
+    }
+
+    // movendo a chave do ramo pro pai, isso reduz o número de chaves do ramo
+
+    chaves[chave-1] = ramo->getChave(ramo->getNChaves()-1);
+
+    filho->incrementaNchaves();
+    ramo->decrementaNchaves();
+
+    return;
+}
+void NoBTree::emprestarDoProximo(int chave) {
+
+    NoBTree *filho = filhos[chave];
+    NoBTree *ramo = filhos[chave+1];
+
+    // chaves[chave] é inserido como ultima chave em filhos[chave]
+    filho->setChaves(filho->getNChaves(), chaves[chave]);
+
+    // o primeiro filho do ramo é inserido como o ultimo filho de filhos[chave]
+    if(!(filho->getFolha()) {
+        filho->setFilhos(filho->getNChaves()+1, ramo->getFilhos(0));
+    }
+
+    // A primeira chave do ramo é inserida em chaves[chave]
+    chaves[chave] = ramo->getChave(0);
+
+    // Move todas as chaves no ramo para trás
+    for(int i = 1; i < ramo->getNChaves(), ++i) {
+        ramo->setChaves(i-1, ramo->getChave(i));
+    }
+
+    // Move os ponteiros dos filhos para trás
+    if(!ramo->getFolha()) {
+        for(int i = 1; i < ramo->getNChaves(); ++i) {
+            ramo->setFilhos(i-1, ramo->getFilhos(i));
+        }
+    }
+
+    // incrementando a contagem de chaves de filhos[chave]
+    filho->incrementaNchaves();
+
+    // decrementando a contagem de chaves de filhos[chave+1]
+    ramo->decrementaNchaves();
+}
+void fundir(int chave) {
+
+    NoBTree *filho = filhos[chave];
+    NoBTree *ramo = filhos[chave+1];
+
+    // tira uma chave do nodo atual e coloca na posição (nivel-1) de filhos[chave]
+    filho->setChaves(nivel-1, chaves[chave]);
+
+    // copia as chaves de filhos[chave+1] para filhos[chave]
+    for(int i = 0; i < ramo->getNChaves(); ++i) {
+        filho->setChaves(i+nivel; ramo->getChave(i));
+    }
+
+    // copia os ponteiros dos filhos de filhos[chave+1] para filhos[chave]
+    if(!filho->getFolha()) {
+        for(int i = 0; i <= ramo->getNChaves()); ++i) {
+            filhos->setFilhos(i+nivel, ramo->getFilhos(i));
+        }
+    }
+
+    /*
+        move todas as chaves depois de "chave" no nodo atual para trás para preencher
+        a lacuna criada movendo chaves[chave] para filhos[chave]
+    */
+    for(int i = chave+2; i < Nchaves; ++i) {
+        chaves[i-1] = chaves[i];
+    }
+
+    // move todos os ponteiros filhos depois de (chave+1) no nodo atual para trás
+    for(int i = chave+2; i<= Nchaves; ++i) {
+        filhos[i-1] = filhos[i];
+    }
+
+    // atualiza o contador de chaves do nodo atual
+    filho->aumentaNChaves(ramo->getNChaves()+1);
+    Nchaves--;
+
+    // desaloca a memória ocupada pelo ramo
+    delete(ramo);
+    return;
+} #endif
+/*
+    TO DO LIST:
+
+    FUNDIR
+
+    FAZER A MAIN E TESTAR SE ESSA PORRA FUNCIONA
+*/
